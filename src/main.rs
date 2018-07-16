@@ -32,7 +32,7 @@ fn get_contact_handler(state: State) -> (State, Response) {
             StatusCode::Ok,
             Some((
                 format!("Email: {}", contact.email).into_bytes(),
-                    mime::TEXT_PLAIN,
+                mime::APPLICATION_JSON,
             )),
         )
     };
