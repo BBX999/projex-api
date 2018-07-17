@@ -1,48 +1,78 @@
+use std::collections::HashSet;
 use chrono::{DateTime, Utc};
 
-#[derive(Debug, Deserialize, Serialize)] // what does this accomplish?
+#[derive(Debug, Deserialize, Serialize)]
 pub enum Gender {
     Male,
     Female
 }
 
-pub enum Marital_Status {
+pub enum MaritalStatus {
     Single,
     Married,
     Divorced,
     Widowed
 }
 
-pub enum Marital_Property {
+pub enum MaritalProperty {
     Separate,
     Community
 }
 
-pub trait Contact {
-    fn uid(&self) -> u64;
-    fn email(&self) -> String; // would take this out as companies / trusts won't have their own email addresses
+pub struct Email {
+    pub address: String,
+    pub primary: bool,
+    pub active: bool,
+    pub notes: String
 }
+
+pub enum Contact {
+    Company(Company),
+    Person(Person),
+    Trust(Trust)
+}
+
+impl Contact {
+    fn uid(&self) -> u64 {
+        match self {
+            Company(c) => c.uid,
+            Person(p) => p.uid,
+            Trust(t) => t.uid
+        }
+    }
+
+    fn email(&self) -> Vec<String> {
+        match self {
+            Company(_) | Trust(_) => {
+                fn email<T>(entity: &[T]) -> <Vec<String>> {
+                  for &contact_person in entity.
+                }
+
+            },
+            Person(p) => p.uid,
+            Trust(t) => t.uid
+        };
+        self.contact_persons
+            .into_iter()
+            .map(|person| person.email)
+            .collect::<Vec<String>>()
+    }
+}
+
+
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Company {
     pub uid: u64,
     pub name: String,
-    pub email: String, // would take this out as companies won't have their own email addresses
+    pub contact_persons: HashSet<Person>,
+    // add more fields here
 }
 
-impl Contact for Company {
-    fn uid(&self) -> u64 {
-        self.uid
-    }
 
-    fn email(&self) -> String {     // would take this out as companies won't have their own email addresses
-        format!("{:?}", &self.email)
-    }
-}
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Person {
-    // we don't need a type field saying that it is a person right? how can we later check 'if person do x'...
     pub uid: u64,
     pub first_name: String,
     pub middle_name: String,
@@ -77,4 +107,13 @@ impl Contact for Person {
     fn email(&self) -> String {
         format!("{:?}", &self.email) // why {:?} is not just {} enough? I thought :? was for arrays/objects etc.
     }
+}
+
+fn test_function(x: Option<String>) -> String {
+    match x {
+        Some(t) => format!("Yay: {:?}", t),
+        None => format!("noooooo")
+
+    }
+
 }
