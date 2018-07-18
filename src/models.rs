@@ -2,9 +2,52 @@ use std::collections::HashSet;
 use chrono::{DateTime, Utc};
 
 //#[derive(Debug, Deserialize, Serialize)]
+
+// ENUMS ------------------------------------------- (alphabetical) ------------------------------------------- //
+
+pub enum AuditEvent {
+    Creation {
+        created_on: DateTime<Utc>,
+        created_by: User
+    },
+    Edit {
+        last_edited: DateTime<Utc>,
+        edited_by: User
+    },
+    Activity (DateTime<Utc>)
+}
+
+pub enum CompanyType {
+    Bank,
+    Gov,
+    GP,
+    Inc,
+    LLC,
+    LLLP,
+    LLP,
+    LP,
+    NPInc,
+    P,
+    PA,
+    PC,
+    PLLC,
+    SDERL
+}
+
+pub enum Contact {
+    Company(Company),
+    Person(Person),
+    Trust(Trust)
+}
+
 pub enum Gender {
     Male,
     Female
+}
+
+pub enum MaritalProperty {
+    Separate,
+    Community
 }
 
 pub enum MaritalStatus {
@@ -14,37 +57,160 @@ pub enum MaritalStatus {
     Widowed
 }
 
-pub enum MaritalProperty {
-    Separate,
-    Community
+pub enum Places {
+    Country(Country),
+    State(State)
+}
+
+pub enum TaxClass {
+    FC,
+    FGTrust,
+    FNGTrust,
+    FSMDE,
+    NRA,
+    RA,
+    SCorp,
+    USCCorp,
+    USCitizen,
+    USGTrust,
+    USNGTrust,
+    USSMDE
+}
+
+pub enum TaxID {
+    EIN(u32),
+    FOREIGN(String),
+    ITIN(u32),
+    SSN(u32)
+}
+// STRUCTS ------------------------------------------- (alphabetical) ------------------------------------------- //
+
+pub struct Address {
+    pub street: String,
+    pub city_state: String,
+    pub country: HashSet<Country>,
+    pub postal_code: Option<String>,
+    pub active: bool,
+    pub notes: Option<String>,
+    pub audit_trail: HashSet<AuditEvent>
+}
+
+pub struct Asset {
+    // will continue from here
+}
+
+pub struct Company {
+    pub uid: u64,
+    pub name: String,
+    pub jurisdiction: Country,
+    pub company_type: CompanyType,
+    pub formation_date: Option<DateTime<Utc>>,
+    pub tax_profile: Option<TaxProfile>,
+    pub contact_persons: HashSet<Person>,
+    pub owners: Option<HashSet<Box<Contact>>>,
+    pub subsidiaries: Option<HashSet<Box<Company>>>,
+    //pub assets:
+    pub audit_trail: HashSet<AuditEvent>
+
+}
+
+pub struct Country {
+    pub name: String
 }
 
 pub struct Email {
     pub address: String,
     pub primary: bool,
     pub active: bool,
-    pub notes: String
+    pub notes: Option<String>,
+    pub audit_trail: HashSet<AuditEvent>
 }
 
-pub enum Contact {
-    Company(Company),
-    Person(Person),
-    Trust(Trust)
+pub struct Person {
+    pub uid: u64,
+    pub first_name: String,
+    pub middle_name: Option<String>,
+    pub last_name: String,
+    pub gender: Gender,
+    pub start_date: Option<DateTime<Utc>>,
+    pub inactive: bool,
+    pub end_date: Option<DateTime<Utc>>,
+    pub marital_status: Option<MaritalStatus>,
+    pub marital_property: Option<MaritalProperty>,
+    pub marital_start_date: Option<DateTime<Utc>>,
+    pub marital_end_date: Option<DateTime<Utc>>,
+    pub spouse: Option<Box<Person>>,
+    pub parents: Option<HashSet<Box<Person>>>,
+    pub children: Option<HashSet<Box<Person>>>,
+    pub tax_profile: Option<TaxProfile>,
+    pub citizenships: Option<HashSet<Country>>,
+    pub addresses: Option<HashSet<Address>>,
+    pub emails: Option<HashSet<Email>>,
+    pub phone_numbers: Option<HashSet<Phone>>,
+    pub notes: String,
+    pub real: bool,
+    pub audit_trail: HashSet<AuditEvent>
 }
 
-impl Contact {
-    fn uid(&self) -> u64 {
-        match self {
-            Contact::Company(c) => c.uid,
-            Contact::Person(p) => p.uid,
-            Contact::Trust(t) => t.uid
-        }
-    }
+pub struct Phone {
+    pub number: u64,
+    pub primary: bool,
+    pub active: bool,
+    pub notes: Option<String>,
+    pub audit_trail: HashSet<AuditEvent>
+}
 
-    fn email(&self) -> Vec<String> {
-        let get_emails = |entity| {
+pub struct State {
+    pub name: String
+}
 
-        };
+pub struct TaxProfile {
+    pub tax_class: Option<TaxClass>,
+    pub us_tax_id: Option<TaxID>,
+    pub foreign_tax_id: Option<TaxID>,
+    pub fatca_status: String,
+    pub taxable_jurisdictions: HashSet<Places>
+}
+
+pub struct Trust {
+    pub uid: u64,
+    pub name: String,
+    pub contact_persons: HashSet<Person>,
+    pub tax_profile: Option<TaxProfile>,
+    // add more fields here,
+    pub audit_trail: HashSet<AuditEvent>
+}
+
+pub struct User {
+    pub uid: u64,
+    pub username: String,
+    pub email: Email,
+    pub person: Option<Box<Person>>,
+    pub active: bool,
+    pub audit_trail: HashSet<AuditEvent>
+}
+
+
+
+
+
+
+
+
+//
+//impl Contact {
+//    fn uid(&self) -> u64 {
+//        match self {
+//            Contact::Company(c) => c.uid,
+//            Contact::Person(p) => p.uid,
+//            Contact::Trust(t) => t.uid
+//        }
+//    }
+//
+//    fn email(&self) -> Vec<String> {
+//        let get_emails = |entity| {
+//
+//        };
 
 //        match self {
 //            Contact::Company(_) | Contact::Trust(_) => {
@@ -58,51 +224,15 @@ impl Contact {
 //            .map(|person| person.email)
 //            .collect::<Vec<String>>()
 //    }
-}
+//}
 
 
 
-//#[derive(Debug, Deserialize, Serialize)]
-pub struct Company {
-    pub uid: u64,
-    pub name: String,
-    pub contact_persons: HashSet<Person>,
-    // add more fields here
-}
 
 
 
-//#[derive(Debug, Deserialize, Serialize)]
-pub struct Person {
-    pub uid: u64,
-    pub first_name: String,
-    pub middle_name: String,
-    pub last_name: String,
-    pub emails: Vec<String>,
-    pub gender: Gender,
-    pub start_date: DateTime<Utc>,
-    pub inactive: bool,
-    pub end_date: Option<DateTime<Utc>>, // I understand that this is likely empty, but we won't have a birthday for everyone either...
-    pub marital_status: MaritalStatus,
-    pub marital_property: MaritalProperty,
-    pub marital_start_date: DateTime<Utc>,
-    pub marital_end_date: Option<DateTime<Utc>>,
-    //pub tax_class: '', // will make one large enum for all classes for entities and people
-    //pub us_tax_id: '', // there are different types, EIN, ITIN, SSN, do we care? or just take the number?m yes with ENUM
-    pub notes: String,
-    //pub addresses: '', // many to many...
-    //pub phone_numbers: '', // many-to-many./..
-    pub real: bool, // if Person is real or fictitious
-    pub created_on: DateTime<Utc>,
-    //pub created_by: '', // make STRUCT of USERS
-    // how do we deal with related parties, such as who their spouse is? or many-to-many relations such as many e-mail addresses? - structs and vects
-}
 
 
-//#[derive(Debug, Deserialize, Serialize)]
-pub struct Trust {
-    pub uid: u64,
-    pub name: String,
-    pub contact_persons: HashSet<Person>,
-    // add more fields here
-}
+
+
+
